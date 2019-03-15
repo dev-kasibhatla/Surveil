@@ -34,3 +34,5 @@ captures/
 \.idea/
 
 *.pro
+
+*.iml
