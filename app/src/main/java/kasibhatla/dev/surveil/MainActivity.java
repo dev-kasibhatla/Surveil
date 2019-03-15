@@ -1,12 +1,14 @@
 package kasibhatla.dev.surveil;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
@@ -15,7 +17,9 @@ public class MainActivity extends AppCompatActivity {
     public TextView txtLog;
 
     //Getting a global camera cause this app revolves around it :D
-    Camera cam;
+   // Camera cam;
+   // CameraPreview camPreview;
+    FrameLayout previewLayout;
 
     //OnCreate stuff
     @Override
@@ -28,7 +32,12 @@ public class MainActivity extends AppCompatActivity {
     private void initializeParameters(){
        txtLog = (TextView) findViewById(R.id.txtLog);
        getSupportActionBar().hide();
-       cam = getCameraInstance();
+       previewLayout = (FrameLayout) findViewById(R.id.camPreviewLayout);
+       //Create an instance of camera
+     //  cam = getCameraInstance();
+        // Create our Preview view and set it as the content of our activity.
+      //  camPreview = new CameraPreview(this, cam);
+
     }
 
     //Get logs going
@@ -61,13 +70,14 @@ public class MainActivity extends AppCompatActivity {
         return c; // returns null if camera is unavailable
     }
     public void getCameraParameters(){
-        cam.getParameters();
+        //cam.getParameters();
         //Use cam.setParameters() to set all sorts of cam settings such as white balance, anti-banding frequency, etc
         //cam.setParameters(FOCUSE_MODE_VIDEO);
     }
     //Buttons
     public void btnGetVideoStream(View v){
-
+        previewLayout.removeAllViews();
+        //previewLayout.addView(camPreview);
     }
 
     public void btnClearLogs(View v){
@@ -88,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
             pushToLogs();
         }
     }
-
+    public void btnOpenCameraPreview(View v){
+        Intent i = new Intent(MainActivity.this, CameraPreviev2.class);
+        startActivity(i);
+    }
 
 }
