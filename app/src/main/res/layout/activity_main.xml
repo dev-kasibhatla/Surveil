@@ -17,8 +17,8 @@
 
         <FrameLayout
             android:id="@+id/camPreviewLayout"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_width="240dp"
+            android:layout_height="320dp"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
@@ -56,7 +56,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:text="Button"
+            android:onClick="btnStartPreview"
+            android:text="Preview"
             app:layout_constraintEnd_toStartOf="@+id/button3"
             app:layout_constraintStart_toEndOf="@+id/button"
             app:layout_constraintTop_toBottomOf="@+id/camPreviewLayout" />
@@ -70,14 +71,14 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:onClick="btnCheckForHardware"
-            android:text="Check"
+            android:onClick="btnClickPicture"
+            android:text="Click"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/button2"
             app:layout_constraintTop_toBottomOf="@+id/camPreviewLayout" />
 
         <Button
-            android:id="@+id/button4"
+            android:id="@+id/logButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -85,8 +86,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginRight="16dp"
-            android:onClick="btnPushToLogs"
-            android:text="Get Logs"
+            android:longClickable="true"
+            android:text="Logs"
             app:layout_constraintEnd_toStartOf="@+id/button5"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/button" />
@@ -100,10 +101,9 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:onClick="btnClearLogs"
-            android:text="Clear Logs"
+            android:text="Button"
             app:layout_constraintEnd_toStartOf="@+id/button6"
-            app:layout_constraintStart_toEndOf="@+id/button4"
+            app:layout_constraintStart_toEndOf="@+id/logButton"
             app:layout_constraintTop_toBottomOf="@+id/button2" />
 
         <Button
@@ -115,8 +115,8 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
-            android:onClick="btnOpenCameraPreview"
-            android:text="Button"
+            android:onClick="btnKillEverything"
+            android:text="Release"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/button5"
             app:layout_constraintTop_toBottomOf="@+id/button3" />
@@ -134,7 +134,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button4">
+            app:layout_constraintTop_toBottomOf="@+id/logButton">
 
             <android.support.constraint.ConstraintLayout
                 android:layout_width="match_parent"
