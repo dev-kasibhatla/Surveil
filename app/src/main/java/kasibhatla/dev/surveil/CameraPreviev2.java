@@ -121,6 +121,7 @@ public class CameraPreviev2 extends AppCompatActivity {
         Intent i = new Intent(CameraPreviev2.this, MainActivity.class);
         mCamera.stopPreview();
         mCamera.release();
+        mCamera.unlock();
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(i);
 
