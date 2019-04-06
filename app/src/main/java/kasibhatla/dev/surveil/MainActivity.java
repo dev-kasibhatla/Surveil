@@ -4,11 +4,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
+import android.media.CamcorderProfile;
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -37,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
     //Getting a global camera cause this app revolves around it :D
     Camera cam;
     CameraPreview camPreview;
-    FrameLayout previewLayout;
+    SurfaceView previewLayout;
+    SurfaceHolder surfaceHolder;
 
     //OnCreate stuff
     @Override
@@ -45,7 +50,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        initializeParameters();
+       // previewLayout = (SurfaceView) findViewById(R.id.camPreviewLayout);
+      //  surfaceHolder = previewLayout.getHolder();
+      //  surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+       // initializeParameters();
     }
 
     /**
@@ -67,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
        //previewLayout = (FrameLayout) findViewById(R.id.camPreviewLayout);
        //Create an instance of camera
 
-
         cam = getCameraInstance();
         Camera.Parameters parameters = cam.getParameters();
         List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
@@ -75,7 +82,8 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "Dimensions: (w,h): " + camSize.width + "\t" + camSize.height);
         }
         Camera.Size cs = sizes.get(0);
-        parameters.setPreviewSize(cs.width, cs.height);
+        //parameters.setPreviewSize(cs.width, cs.height);
+        //parameters.setPreviewSize(320,240);
         cam.setParameters(parameters);
         cam.setDisplayOrientation(90);
 
@@ -141,10 +149,6 @@ public class MainActivity extends AppCompatActivity {
         //cam.setParameters(FOCUSE_MODE_VIDEO);
     }
     //Buttons
-    public void btnGetVideoStream(View v){
-        previewLayout.removeAllViews();
-        //previewLayout.addView(camPreview);
-    }
 
 
     boolean firstOpen=true;
@@ -163,8 +167,13 @@ public class MainActivity extends AppCompatActivity {
         }else {
             //Get a preview
             camPreview = new CameraPreview(this, cam);
-            FrameLayout preview = (FrameLayout) findViewById(R.id.camPreviewLayout);
-            preview.addView(camPreview);
+
+            try {
+                cam.setPreviewDisplay(surfaceHolder);
+            }catch (Exception e){
+                Log.d(TAG, "preview error surfaceholder");
+                e.printStackTrace();
+            }
             firstOpen=false;
         }
 
@@ -207,6 +216,120 @@ public class MainActivity extends AppCompatActivity {
         cam.release();
     }
 
+    public void btnCaptureVideo(View v){
+        /*
+        Order after getting preview:
+            Unlock camera
+            Configure media recorder
+            set audio source
+            set video source
+            Video format and encoding
+            setoutput file
+            THEN CONNECT PREVIEW
+            prepare media recorder
+            start mediarecorder
+            stop recording video
+            release mediarecorder
+            lock camera
+            stop preview
+            release camera
+         */
+
+        if(prepareMediaRecorder()){
+            Log.i(TAG, "Media recorder was successful");
+            logThis("Preparation successful");
+            mediaRecorder.start();
+            Toast.makeText(this, "Started video recording", Toast.LENGTH_SHORT).show();
+        }else{
+            logThis("Error with media recorder");
+            Toast.makeText(this, "Error-mediarecorder", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    public void btnStopVideo(View v){
+        try{
+            mediaRecorder.stop();
+            mediaRecorder.reset();
+            Toast.makeText(this, "Stop-error", Toast.LENGTH_SHORT).show();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        mediaRecorder.release();
+        cam.lock();
+        //Toast.makeText(this, "Stopped recording", Toast.LENGTH_SHORT).show();
+    }
+
+    public MediaRecorder mediaRecorder;
+
+    private boolean prepareMediaRecorder(){
+        //cam is the camera instance
+        mediaRecorder = new MediaRecorder();
+
+
+        CamcorderProfile profile = CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+        Camera.Parameters parameters = cam.getParameters();
+        parameters.setPreviewSize(profile.videoFrameWidth,profile.videoFrameHeight);
+
+        Log.i(TAG, profile.videoFrameWidth + "\t" + profile.videoFrameHeight);
+       // previewLayout.setMinimumHeight(profile.videoFrameHeight);
+       // previewLayout.setMinimumWidth(profile.videoFrameWidth);
+        try{
+            cam.setParameters(parameters);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        camPreview = new CameraPreview(this, cam);
+        //previewLayout.addView(camPreview);
+        try {
+            cam.setPreviewDisplay(surfaceHolder);
+        }catch (Exception e){
+            Log.d(TAG, "preview error surfaceholder");
+            e.printStackTrace();
+        }
+
+//        cam.startPreview();
+
+        //1
+        //cam.stopPreview();
+      //  cam=getCameraInstance();
+        cam.unlock();
+        mediaRecorder.setCamera(cam);
+
+        //2 - sources
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+     //   mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+     //   mediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.MPEG_4_SP);
+
+        //3 - camcorder profile
+//        cam.setDisplayOrientation(90);
+
+        mediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+
+
+        //4 - output file
+        mediaRecorder.setOutputFile(getOutputMediaFile(MEDIA_TYPE_VIDEO).toString());
+
+        //preview
+        mediaRecorder.setPreviewDisplay(camPreview.getHolder().getSurface());
+
+        // Step 6: Prepare configured MediaRecorder
+        try {
+            mediaRecorder.prepare();
+        } catch (IllegalStateException e) {
+            Log.d(TAG, "IllegalStateException preparing MediaRecorder: " + e.getMessage());
+            mediaRecorder.release();
+            return false;
+        } catch (IOException e) {
+            Log.d(TAG, "IOException preparing MediaRecorder: " + e.getMessage());
+            mediaRecorder.release();
+            return false;
+        }
+        return true;
+    }
+
+
 
 
     //Implement picture callback for saving data as JPEG
@@ -223,6 +346,7 @@ public class MainActivity extends AppCompatActivity {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(data);
                 fos.close();
+                Toast.makeText(MainActivity.this, "Created file", Toast.LENGTH_SHORT).show();
             } catch (FileNotFoundException e) {
                 Log.d(TAG, "File not found: " + e.getMessage());
             } catch (IOException e) {
@@ -264,6 +388,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Create a media file name
+
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile;
         if (type == MEDIA_TYPE_IMAGE){
@@ -277,6 +402,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return mediaFile;
+    }
+
+
+    public void btnOpenFileManagement(View v){
+        Intent i = new Intent(MainActivity.this, FileManagement.class);
+        startActivity(i);
+    }
+
+    public void btnVideoActivity(View v){
+        //put some things back in place so that other activities can utilize 'em
+      //  cam.lock();
+      //  cam.release();
+        Intent i = new Intent(MainActivity.this, VideoActivity.class);
+        startActivity(i);
     }
 
 
