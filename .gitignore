@@ -36,3 +36,5 @@ captures/
 *.pro
 
 *.iml
+
+app/src/main/res/menu/navigation\.xml
