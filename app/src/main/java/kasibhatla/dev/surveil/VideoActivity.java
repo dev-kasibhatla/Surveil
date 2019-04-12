@@ -136,6 +136,7 @@ public class VideoActivity extends AppCompatActivity {
             mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
             mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
             mMediaRecorder.setOutputFile(Environment.getExternalStorageDirectory().getPath()+File.separator+ "video.mp4");
+            mMediaRecorder.setOutputFile(videoNameConstructor()+".mp4");
             //   mMediaRecorder.setVideoFrameRate(30);
             mMediaRecorder.setVideoSize(mPreviewSize.width, mPreviewSize.height);
             mMediaRecorder.setPreviewDisplay(surfaceHolder.getSurface());
@@ -192,7 +193,7 @@ public class VideoActivity extends AppCompatActivity {
         File name;
         //Temporary naming scheme until the working conditions are figured out
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        name  = new File(MainActivity.folder+"videos/",timeStamp+".mp4");
+        name  = new File(MainActivity.folder+"videos"+File.separator,timeStamp);
         return name;
     }
 
