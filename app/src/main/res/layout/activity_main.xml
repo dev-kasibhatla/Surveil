@@ -17,8 +17,8 @@
 
         <SurfaceView
             android:id="@+id/camPreviewLayout"
-            android:layout_width="320dp"
-            android:layout_height="240dp"
+            android:layout_width="240dp"
+            android:layout_height="320dp"
             android:layout_marginStart="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginTop="8dp"
