@@ -3,6 +3,9 @@ package kasibhatla.dev.surveil;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -19,6 +22,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -50,10 +54,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       // previewLayout = (SurfaceView) findViewById(R.id.camPreviewLayout);
-      //  surfaceHolder = previewLayout.getHolder();
-      //  surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-       // initializeParameters();
+        previewLayout = (SurfaceView) findViewById(R.id.camPreviewLayout);
+        surfaceHolder = previewLayout.getHolder();
+        surfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        initializeParameters();
     }
 
     /**
@@ -82,10 +86,15 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "Dimensions: (w,h): " + camSize.width + "\t" + camSize.height);
         }
         Camera.Size cs = sizes.get(0);
-        //parameters.setPreviewSize(cs.width, cs.height);
-        //parameters.setPreviewSize(320,240);
-        cam.setParameters(parameters);
+        parameters.setPreviewSize(cs.width, cs.height);
+        parameters.setPictureSize(cs.width, cs.height);
+        parameters.setRotation(270);
+
         cam.setDisplayOrientation(90);
+        //parameters.setPreviewSize(320,240);
+        previewLayout.getHolder().setFixedSize(cs.width, cs.height);
+        cam.setParameters(parameters);
+
 
 
         //setting up a listener for log button:
@@ -344,7 +353,10 @@ public class MainActivity extends AppCompatActivity {
 
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
+                //rotate image 90 clockwise
+
+                //fos.write(data);
+                fos.write(rotateImage(data,90));
                 fos.close();
                 Toast.makeText(MainActivity.this, "Created file", Toast.LENGTH_SHORT).show();
             } catch (FileNotFoundException e) {
@@ -356,6 +368,44 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
+    public byte[] rotateImage(byte[] data, int degree){
+        Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+        int w = bmp.getWidth();
+        int h = bmp.getHeight();
+        Matrix matrix = new Matrix();
+        matrix.setRotate(degree);
+
+        Bitmap bmp2= Bitmap.createBitmap(bmp, 0,0,w,h,matrix,true);
+
+        //well that didn't work, so lets try converting it back to byte array
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bmp2.compress(Bitmap.CompressFormat.JPEG,100,stream);
+        byte[] byteArray = stream.toByteArray();
+        bmp2.recycle();
+        return byteArray;
+        /*
+        * EXIF interface is a more versatile and accurate way of handling, but not
+        * required in this scenario
+        *
+        * Bitmap realImage = BitmapFactory.decodeByteArray(data, 0, data.length);
+
+        ExifInterface exif=new ExifInterface(pictureFile.toString());
+
+        Log.d("EXIF value", exif.getAttribute(ExifInterface.TAG_ORIENTATION));
+        if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("6")){
+            realImage= rotate(realImage, 90);
+        } else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("8")){
+            realImage= rotate(realImage, 270);
+        } else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("3")){
+            realImage= rotate(realImage, 180);
+        } else if(exif.getAttribute(ExifInterface.TAG_ORIENTATION).equalsIgnoreCase("0")){
+            realImage= rotate(realImage, 90);
+        }
+
+        * */
+    }
 
     //Saving media files
     public static final int MEDIA_TYPE_IMAGE = 1;
@@ -412,8 +462,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void btnVideoActivity(View v){
         //put some things back in place so that other activities can utilize 'em
-      //  cam.lock();
-      //  cam.release();
+        cam.lock();
+        cam.release();
         Intent i = new Intent(MainActivity.this, VideoActivity.class);
         startActivity(i);
     }
