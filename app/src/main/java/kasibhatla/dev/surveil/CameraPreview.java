@@ -5,7 +5,6 @@ import android.hardware.Camera;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
 import java.io.IOException;
 
@@ -19,7 +18,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public CameraPreview(Context context, Camera camera) {
         super(context);
         mCamera = camera;
-
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
 
@@ -43,7 +41,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // empty. Take care of releasing the Camera preview in your activity.
     }
 
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+    
+    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
 
@@ -61,6 +60,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
         // set preview size and make any resize, rotate or
         // reformatting changes here
+
 
         // start preview with new settings
         try {
